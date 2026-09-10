@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Legal CMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-admin { background: linear-gradient(135deg, #dc3545, #c0392b); padding: 12px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .navbar-admin .navbar-brand { color: white; font-size: 24px; font-weight: 300; }
+        .navbar-admin .navbar-brand strong { color: #ffd700; }
+        .nav-link-admin { color: rgba(255,255,255,0.8) !important; }
+        .nav-link-admin:hover { color: white !important; background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #dc3545;
+            transition: all 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 32px; font-weight: 700; color: #1a1a1a; }
+        .stat-label { color: #6c757d; font-size: 14px; }
+        .dashboard-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .badge-admin { background: #dc3545; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-legal { background: #ffc107; color: #333; padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-viewer { background: #0078d4; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+        .btn-delete:hover { background: #c0392b; color: white; }
+        .btn-edit { background: #ffc107; color: #333; border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+        .btn-edit:hover { background: #e0a800; color: #333; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-admin">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-gavel me-2"></i><strong>Admin</strong> CMS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link nav-link-admin active" href="/admin/dashboard"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-admin" href="/contracts"><i class="fas fa-file-contract me-1"></i>Contracts</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-admin" href="/users"><i class="fas fa-users me-1"></i>Users</a></li>
+                    <li class="nav-item"><a class="nav-link nav-link-admin" href="/logout"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold"><i class="fas fa-user-shield me-2" style="color:#dc3545;"></i>Admin Dashboard</h2>
+            <span class="badge bg-danger p-2">Welcome, {{ user.name }}</span>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalContracts">0</div>
+                    <div class="stat-label"><i class="fas fa-file-contract me-1"></i>Total Contracts</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="border-left-color:#28a745;">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label"><i class="fas fa-users me-1" style="color:#28a745;"></i>Total Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="border-left-color:#ffc107;">
+                    <div class="stat-number" id="pendingApprovals">0</div>
+                    <div class="stat-label"><i class="fas fa-clock me-1" style="color:#ffc107;"></i>Pending Approvals</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="border-left-color:#0078d4;">
+                    <div class="stat-number" id="approvedContracts">0</div>
+                    <div class="stat-label"><i class="fas fa-check-circle me-1" style="color:#0078d4;"></i>Approved</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <h5><i class="fas fa-list me-2" style="color:#dc3545;"></i>Recent Contracts</h5>
+                    <div id="recentContracts">Loading...</div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <h5><i class="fas fa-users me-2" style="color:#dc3545;"></i>Users by Role</h5>
+                    <div id="userRoles">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+
+        async function loadDashboard() {
+            try {
+                const stats = await fetch('/dashboard/stats', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await stats.json();
+                document.getElementById('totalContracts').textContent = data.total_contracts || 0;
+                document.getElementById('totalUsers').textContent = data.total_users || 0;
+                document.getElementById('pendingApprovals').textContent = data.pending_approvals || 0;
+                document.getElementById('approvedContracts').textContent = data.approved_contracts || 0;
+
+                const contracts = await fetch('/contracts', { headers: { 'Authorization': `Bearer ${token}` } });
+                const contractData = await contracts.json();
+                const html = contractData.contracts?.slice(0, 5).map(c => 
+                    `<div class="border-bottom py-2 d-flex justify-content-between">
+                        <span>${c.title}</span>
+                        <span class="badge ${c.status === 'approved' ? 'bg-success' : 'bg-secondary'}">${c.status}</span>
+                    </div>`
+                ).join('') || '<p class="text-muted">No contracts found</p>';
+                document.getElementById('recentContracts').innerHTML = html;
+
+                // User roles
+                const users = await fetch('/users', { headers: { 'Authorization': `Bearer ${token}` } });
+                const userData = await users.json();
+                const roles = { admin: 0, legal: 0, viewer: 0 };
+                userData.forEach(u => { roles[u.role] = (roles[u.role] || 0) + 1; });
+                document.getElementById('userRoles').innerHTML = `
+                    <div class="d-flex justify-content-between"><span>👑 Admin</span><span class="badge bg-danger">${roles.admin || 0}</span></div>
+                    <div class="d-flex justify-content-between"><span>⚖️ Legal</span><span class="badge bg-warning text-dark">${roles.legal || 0}</span></div>
+                    <div class="d-flex justify-content-between"><span>👤 Viewer</span><span class="badge bg-primary">${roles.viewer || 0}</span></div>
+                `;
+            } catch (e) {
+                document.getElementById('recentContracts').innerHTML = '<p class="text-danger">Failed to load data</p>';
+            }
+        }
+        loadDashboard();
+    </script>
+</body>
+</html>
